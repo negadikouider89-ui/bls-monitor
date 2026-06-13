@@ -14,15 +14,32 @@ HEADERS = {
 GOOD = ["datepicker","calendar","select date","available","book","reserver"]
 BAD = ["no appointment","not available","complet","aucun","fully booked"]
 
-def send(msg):
+def send(msg, alert=False):
     try:
+        data = {
+            "chat_id": CHAT_ID,
+            "text": msg,
+            "parse_mode": "HTML"
+        }
+        if alert:
+            data["disable_notification"] = False
         requests.post(
             f"https://api.telegram.org/bot{TOKEN}/sendMessage",
-            data={"chat_id":CHAT_ID,"text":msg},
+            data=data,
             timeout=10
         )
     except Exception as e:
         print(e)
+
+def alert_user():
+    msg = (
+        "🚨🚨🚨 موعد متاح الآن! 🚨🚨🚨\n\n"
+        "⚡ احجز فوراً قبل أن يختفي!\n\n"
+        "🔗 " + BLS_URL
+    )
+    for i in range(5):
+        send(msg, alert=True)
+        time.sleep(3)
 
 def check():
     try:
@@ -31,15 +48,13 @@ def check():
         good = [k for k in GOOD if k in html]
         bad = [k for k in BAD if k in html]
         if good and not bad:
-            send("APPOINTMENT AVAILABLE! Book now: " + BLS_URL)
-            time.sleep(5)
-            send("APPOINTMENT AVAILABLE! Book now: " + BLS_URL)
+            alert_user()
         elif bad:
-            send("No appointments yet. Checked: " + time.strftime("%H:%M UTC"))
+            send("🔴 لا توجد مواعيد - " + time.strftime("%H:%M UTC"))
         else:
-            send("Check done. Size: " + str(len(html)))
+            send("✅ فحص - Size: " + str(len(html)))
     except Exception as e:
-        send("Error: " + str(e))
+        send("❌ خطأ: " + str(e))
 
 check()
 
