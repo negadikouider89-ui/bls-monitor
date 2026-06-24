@@ -1,7 +1,7 @@
 name: BLS Monitor
 on:
   schedule:
-    - cron: '*/1* * * *'
+    - cron: '* * * * *'
   workflow_dispatch:
 jobs:
   check:
